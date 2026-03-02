@@ -1,0 +1,12 @@
+[package]
+name = "tilestion-viewer"
+version = "0.1.0"
+edition = "2024"
+authors = [ "Eliseo Cailloux" ]
+
+[dependencies]
+gtk4 = "0.10"
+webkit6 = "0.5"
+
+[profile.release]
+debug = 2
