@@ -35,7 +35,9 @@
       {
         devShells.default =
         pkgs.mkShell {
-          buildInputs = with pkgs; [
+          buildInputs = deps;
+
+          nativeBuildInputs = with pkgs; [
             rust-toolchain
             rust-analyzer
 
@@ -45,8 +47,9 @@
 
             # pkg config
             pkg-config
-          ] ++ deps;
-
+          ];
+          
+          # set library path, as rpath can't be set when building manually
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath deps;
           # set the rust src for rust_analyzer
           RUST_SRC_PATH = "${rust-toolchain}/lib/rustlib/src/rust/library";
