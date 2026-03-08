@@ -27,6 +27,7 @@
           webkitgtk_6_0
           gtk4
           libsoup_3
+          glib-networking
           gdk-pixbuf
           cairo
           glib
@@ -38,6 +39,8 @@
           buildInputs = deps;
 
           nativeBuildInputs = with pkgs; [
+            bashInteractive
+
             rust-toolchain
             rust-analyzer
 
@@ -51,6 +54,8 @@
           
           # set library path, as rpath can't be set when building manually
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath deps;
+          # allow gio to discover TLS backend modules (from glib-networking)
+          GIO_EXTRA_MODULES = "${pkgs.glib-networking}/lib/gio/modules";
           # set the rust src for rust_analyzer
           RUST_SRC_PATH = "${rust-toolchain}/lib/rustlib/src/rust/library";
         };
@@ -62,7 +67,11 @@
         }).buildPackage {
           src = ./.;
           buildInputs = deps;
-          nativeBuildInputs = [ pkgs.pkg-config pkgs.autoPatchelfHook ];
+          nativeBuildInputs = [
+            pkgs.pkg-config
+            pkgs.autoPatchelfHook
+            pkgs.wrapGAppsHook4
+          ];
         };
       }
     );
