@@ -64,6 +64,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "frontend-viewer"
+version = "0.1.0"
+dependencies = [
+ "gtk4",
+ "webkit6",
+]
+
+[[package]]
 name = "futures-channel"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -613,14 +621,6 @@ name = "target-lexicon"
 version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df7f62577c25e07834649fc3b39fafdc597c0a3527dc1c60129201ccfcbaa50c"
-
-[[package]]
-name = "tilestion-viewer"
-version = "0.1.0"
-dependencies = [
- "gtk4",
- "webkit6",
-]
 
 [[package]]
 name = "toml"
