@@ -1,5 +1,6 @@
 use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow};
+use gtk4::{EventControllerKey, gdk, glib};
 use webkit6::WebView;
 use webkit6::prelude::*;
 
@@ -111,6 +112,17 @@ fn main() {
             });
         }
         webview.load_uri(&config.uri);
+
+        let key_controller = EventControllerKey::new();
+        let webview_handle = webview.clone();
+        key_controller.connect_key_pressed(move |_, key, _, _| {
+            if key == gdk::Key::F5 {
+                webview_handle.reload();
+                return glib::Propagation::Stop;
+            }
+            glib::Propagation::Proceed
+        });
+        window.add_controller(key_controller);
 
         window.set_child(Some(&webview));
         window.present();
