@@ -115,9 +115,14 @@ fn main() {
 
         let key_controller = EventControllerKey::new();
         let webview_handle = webview.clone();
+        let app_handle = app.clone();
         key_controller.connect_key_pressed(move |_, key, _, _| {
             if key == gdk::Key::F5 {
                 webview_handle.reload();
+                return glib::Propagation::Stop;
+            }
+            if key == gdk::Key::F12 {
+                app_handle.quit();
                 return glib::Propagation::Stop;
             }
             glib::Propagation::Proceed
