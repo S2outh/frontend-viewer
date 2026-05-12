@@ -6,6 +6,7 @@ use webkit6::prelude::*;
 
 const APP_ID: &str = "wuespace.tilestion-viewer";
 const DEFAULT_URI: &str = "http://localhost:3000/";
+const OFFLINE_HTML: &str = include_str!("offline.html");
 
 #[derive(Clone)]
 struct RuntimeConfig {
@@ -111,6 +112,10 @@ fn main() {
                 true
             });
         }
+        webview.connect_load_failed(|webview, _, failing_uri, _| {
+            webview.load_alternate_html(OFFLINE_HTML, failing_uri, None);
+            true
+        });
         webview.load_uri(&config.uri);
 
         let key_controller = EventControllerKey::new();
