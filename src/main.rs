@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Application, ApplicationWindow};
+use gtk4::{Application, ApplicationWindow, Settings};
 use gtk4::{EventControllerKey, gdk, glib};
 use webkit6::WebView;
 use webkit6::prelude::*;
@@ -93,6 +93,10 @@ fn main() {
     let app = Application::builder().application_id(APP_ID).build();
 
     app.connect_activate(move |app| {
+        if let Some(settings) = Settings::default() {
+            settings.set_gtk_application_prefer_dark_theme(true);
+        }
+
         let window = ApplicationWindow::builder()
             .application(app)
             .decorated(false)
