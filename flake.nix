@@ -61,6 +61,9 @@
         };
 
         packages.default = 
+        let
+          cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+        in
         (naersk.lib.${system}.override {
           cargo = rust-toolchain;
           rustc = rust-toolchain;
@@ -72,6 +75,10 @@
             pkgs.autoPatchelfHook
             pkgs.wrapGAppsHook4
           ];
+          # set mainProgram variable for lib.getExe to work
+          overrideMain = old: {
+            meta = (old.meta or {}) // { mainProgram = cargoToml.package.name; };
+          };
         };
       }
     );
