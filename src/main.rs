@@ -8,6 +8,8 @@ const APP_ID: &str = "wuespace.tilestion-viewer";
 const DEFAULT_URI: &str = "http://localhost:3000/";
 const OFFLINE_HTML: &str = include_str!("offline.html");
 
+const RETRY_INTERVAL_SECS: u32 = 2;
+
 #[derive(Clone)]
 struct RuntimeConfig {
     uri: String,
@@ -116,8 +118,19 @@ fn main() {
                 true
             });
         }
-        webview.connect_load_failed(|webview, _, failing_uri, _| {
+        let retry_uri = config.uri.clone();
+        webview.connect_load_failed(move |webview, _, failing_uri, _| {
             webview.load_alternate_html(OFFLINE_HTML, failing_uri, None);
+
+            // The backend may simply not be up yet (e.g. during boot). Keep
+            // retrying the real URI on an interval; the offline page stays
+            // visible meanwhile. A successful load stops the cycle because
+            // load-failed no longer fires.
+            let webview = webview.clone();
+            let retry_uri = retry_uri.clone();
+            glib::timeout_add_seconds_local_once(RETRY_INTERVAL_SECS, move || {
+                webview.load_uri(&retry_uri);
+            });
             true
         });
         webview.load_uri(&config.uri);
