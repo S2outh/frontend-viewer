@@ -1,12 +1,16 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Settings};
 use gtk4::{EventControllerKey, gdk, glib};
-use webkit6::WebView;
+use webkit6::{LoadEvent, WebView};
 use webkit6::prelude::*;
 
 const APP_ID: &str = "wuespace.tilestion-viewer";
 const DEFAULT_URI: &str = "http://localhost:3000/";
 const OFFLINE_HTML: &str = include_str!("offline.html");
+const LOADING_HTML: &str = include_str!("loading.html");
 
 const RETRY_INTERVAL_SECS: u32 = 2;
 
@@ -133,7 +137,25 @@ fn main() {
             });
             true
         });
-        webview.load_uri(&config.uri);
+
+        // Render an in-memory loading page first, then navigate to the real
+        // URI once that page has been committed. WebKit keeps the loading page
+        // on screen until the real response arrives (or load-failed swaps in
+        // the offline page), so the initial connect never flashes a blank
+        // screen.
+        let target_uri = config.uri.clone();
+        let handler_id: Rc<RefCell<Option<glib::SignalHandlerId>>> = Rc::new(RefCell::new(None));
+        let handler_id_inner = handler_id.clone();
+        let id = webview.connect_load_changed(move |webview, event| {
+            if event == LoadEvent::Finished {
+                if let Some(id) = handler_id_inner.borrow_mut().take() {
+                    webview.disconnect(id);
+                }
+                webview.load_uri(&target_uri);
+            }
+        });
+        *handler_id.borrow_mut() = Some(id);
+        webview.load_html(LOADING_HTML, None);
 
         let key_controller = EventControllerKey::new();
         let webview_handle = webview.clone();
