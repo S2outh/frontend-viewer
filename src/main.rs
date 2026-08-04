@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Duration;
 
 use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Settings};
@@ -12,7 +13,7 @@ const DEFAULT_URI: &str = "http://localhost:3000/";
 const OFFLINE_HTML: &str = include_str!("offline.html");
 const LOADING_HTML: &str = include_str!("loading.html");
 
-const RETRY_INTERVAL_SECS: u32 = 2;
+const RETRY_INTERVAL: Duration = Duration::from_millis(200);
 
 #[derive(Clone)]
 struct RuntimeConfig {
@@ -132,7 +133,7 @@ fn main() {
             // load-failed no longer fires.
             let webview = webview.clone();
             let retry_uri = retry_uri.clone();
-            glib::timeout_add_seconds_local_once(RETRY_INTERVAL_SECS, move || {
+            glib::timeout_add_local_once(RETRY_INTERVAL, move || {
                 webview.load_uri(&retry_uri);
             });
             true
